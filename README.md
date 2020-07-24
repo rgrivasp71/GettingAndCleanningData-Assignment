@@ -29,9 +29,23 @@ yData<- left_join(yData,activityLabels)
 #adding names to yData
 colnames(yData)=c("activityID", "activity")
 
-
-
 ### 2. Extracts only the measurements on the mean and standard deviation for each measurement.
+
+#Subsetting mean and standard deviation colums
+meanAndStdColumns <-  grep("(*std*)|(*[M|m]ean*)",features[,2])
+xDataFiltered <- xData[,meanAndStdColumns]
+
 ### 3. Uses descriptive activity names to name the activities in the data set
+yData<- left_join(yData,activityLabels)
+
 ### 4. Appropriately labels the data set with descriptive variable names.
+mergedFilteredData<-data.table(cbind(yData,xDataFiltered))
 ### 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+
+#Average data grouped by activity id and activity columns
+averageData <- mergedFilteredData[,lapply(.SD,mean),by=c("activityID","activity")]
+averageData <- averageData[order(activityID)]
+
+#Creating file called "averageData.csv"
+write.table(averageData,file="averageData.csv", row.names = FALSE)
+
